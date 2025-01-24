@@ -2,14 +2,14 @@ package com.example.feeservice.service;
 import java.time.LocalDateTime;
 
 import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import com.example.feeservice.client.StudentServiceClient;
 import com.example.feeservice.dto.StudentDTO;
 import com.example.feeservice.entity.FeePayment;
 import com.example.feeservice.entity.Receipt;
-//import com.example.feeservice.events.FeePaymentEvent;
+import com.example.feeservice.events.FeePaymentEvent;
 import com.example.feeservice.exception.StudentNotFoundException;
 import com.example.feeservice.repository.FeePaymentRepository;
 import com.example.feeservice.repository.ReceiptRepository;
@@ -28,8 +28,8 @@ public class FeePaymentService {
     @Autowired
     private StudentServiceClient studentServiceClient;
     
-   // @Autowired
-   // private KafkaTemplate<String, FeePaymentEvent> kafkaTemplate;
+    @Autowired
+    private KafkaTemplate<String, FeePaymentEvent> kafkaTemplate;
 
     private static final String FEE_PAYMENT_TOPIC = "fee-payment-topic"; // Topic for fee payment events
 
@@ -78,8 +78,8 @@ public class FeePaymentService {
 
         receipt.setTotalAmount(receipt.getTotalAmount() + amount);
         receipt = receiptRepository.save(receipt);
-      //  FeePaymentEvent feePaymentEvent = new FeePaymentEvent(studentId, feeType, amount, receipt.getReferenceNumber());
-       // kafkaTemplate.send(FEE_PAYMENT_TOPIC, feePaymentEvent);
+        FeePaymentEvent feePaymentEvent = new FeePaymentEvent(studentId, feeType, amount, receipt.getReferenceNumber());
+        kafkaTemplate.send(FEE_PAYMENT_TOPIC, feePaymentEvent);
 
         return receipt;
     }
